@@ -33,3 +33,15 @@ Acceptance: existing tests pass; bundled release works with no npm install; inst
 ## Reproducibility
 
 Keep package-lock.json, installer tests and CI in the public repository. Use these project-specific scripts for future releases rather than introducing a global skill for a single project. Local historical notes remain on disk but are ignored by Git.
+
+## v0.1.0 verification
+
+- Published commit `1a9f1b0` as a public repository and tagged release. An unauthenticated GitHub API request confirms public visibility.
+- Local automated suite: 29 passed, zero failed, one optional commercial-ROM test skipped. Static browser build passed.
+- GitHub Actions run [36366346105](https://github.com/kathoc/nesterm/actions/runs/36366346105): all four macOS/Linux and Node.js 22/24 jobs passed, including tests, static build and installation of the bundled archive.
+- Release archive: 140,503 bytes, SHA-256 `d328b2152b46d243465776b1e4b5d4462fd736ea5b2774d197ee55940b62ed19`. Its emulator dependency and licenses are bundled; no ROMs or recordings are included.
+- Installed from the public raw installer and release URLs into two fresh Linux prefixes: system Node (with spaces in the prefix) and automatically downloaded private Node.js v24.21.0. Both launchers passed help and a one-second local SMB3 emulation smoke test with PATH cleared of executables.
+- Fixture tests additionally cover reinstall, corrupt checksums, unrelated-file protection, prefix symlink rejection and switching from system Node to a private runtime.
+- macOS is verified through hosted CI, not a manually operated Mac terminal. ARM64 Linux and Intel macOS runtime downloads were not independently exercised. Terminal keyboard behavior remains subject to the compatibility limits in the README.
+
+The requested repository, English user guide and one-line installer are complete. No rendering changes were made for this packaging release.
