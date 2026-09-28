@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+while read -r local_ref local_oid remote_ref remote_oid; do
+  case "$local_oid" in
+    0000000000000000000000000000000000000000) continue ;;
+  esac
+  node scripts/check-public-scope.mjs --ref "$local_oid"
+done

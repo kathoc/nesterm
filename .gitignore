@@ -18,3 +18,17 @@ scripts/find-gameplay.mjs
 *.key
 *.tgz
 .DS_Store
+
+# This public repository is CLI-only. These local files must never be published.
+web/
+vendor/
+scripts/build.mjs
+scripts/serve.mjs
+scripts/browser-check.mjs
+scripts/controller-check.mjs
+scripts/controller-gameplay.mjs
+scripts/import-brickboy.mjs
+test/desktop-input.test.mjs
+test/input-router.test.mjs
+docs/controller-port-spec.md
+docs/local-web.md

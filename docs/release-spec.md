@@ -2,7 +2,22 @@
 
 ## Scope
 
-Publish kathoc/nesterm as a public GitHub repository, with an English user-facing README, a tagged v0.1.0 release and a one-line installer for macOS and Linux. Keep the existing ASCII renderer, browser frontend and local gameplay recordings. Never include ROMs, personal work notes, credentials or recordings in the Git commit or release archive.
+Publish kathoc/nesterm as a CLI-only public GitHub repository, with an English user-facing README and a one-line installer for macOS and Linux. Never include browser interfaces, browser tooling, ROMs, personal work notes, credentials or recordings in future Git commits or release archives.
+
+## CLI-only boundary (2026-09-28)
+
+The initial public revision included browser files because the Git source boundary was broader than the terminal package allowlist. The owner has now explicitly prohibited all future browser-interface publication to this repository.
+
+Plan, in priority order:
+
+1. Remove browser files from the Git index only; preserve local files and existing deployment. High benefit, low cost; adopted.
+2. Remove browser documentation, npm commands, dependency and CI job. High benefit, low cost; adopted.
+3. Ignore local browser sources, controller vendors, tests and tooling. High benefit, low cost; adopted.
+4. Check an explicit tracked-file allowlist in local hooks and CI. High benefit, moderate cost; adopted. New CLI files require deliberate allowlist review.
+5. Verify tests and packaging from an isolated index export without local browser files. High benefit, low cost; adopted.
+6. Rewrite existing public history and tags. Disruptive and not authorized; not adopted. Older commits retain their historical contents.
+
+Completion: current public main contains only CLI implementation and its supporting documentation/tooling; a forced addition of a browser path is rejected by the guard; clean-export CLI tests and archive smoke checks pass. No changes to the separate reference project's repository or the deployed site. Record the final verification below.
 
 ## Packaging decision
 
@@ -32,7 +47,7 @@ Acceptance: existing tests pass; bundled release works with no npm install; inst
 
 ## Reproducibility
 
-Keep package-lock.json, installer tests and CI in the public repository. Use these project-specific scripts for future releases rather than introducing a global skill for a single project. Local historical notes remain on disk but are ignored by Git.
+Keep package-lock.json, installer tests and CLI-only CI in the public repository. Use the project-specific scripts for future releases. The owner's publication boundary is also recorded in the shared rule, thin skill and memory. Local historical notes remain on disk but are ignored by Git.
 
 ## v0.1.0 verification
 
@@ -45,3 +60,11 @@ Keep package-lock.json, installer tests and CI in the public repository. Use the
 - macOS is verified through hosted CI, not a manually operated Mac terminal. ARM64 Linux and Intel macOS runtime downloads were not independently exercised. Terminal keyboard behavior remains subject to the compatibility limits in the README.
 
 The requested repository, English user guide and one-line installer are complete. No rendering changes were made for this packaging release.
+
+## CLI-only separation verification
+
+- Exported all 31 staged paths into a fresh directory without local browser files; `npm ci`, CLI help and the automated suite passed (31 passed, one optional commercial-ROM test skipped).
+- Tested a forced addition of `web/app.mjs` using an isolated Git index; the publication guard rejected it without changing the real index.
+- Package inspection retained only CLI files, licenses and the bundled NES dependency; the release script validated its allowlist.
+- Local ignored controller tests still pass (13/13), and the upstream controller hash/provenance check still passes. Browser files were untracked, not deleted. No deployment or reference-repository write occurred.
+- No rendering or interaction behavior was changed, so no new UI screenshots were required for this separation.

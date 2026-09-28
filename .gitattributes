@@ -1,2 +1,0 @@
-# The initial ASCII screen contains intentional fixed-width blank cells.
-web/index.html whitespace=-blank-at-eol

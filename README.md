@@ -4,6 +4,8 @@ Play NES games in your terminal using **ASCII characters only**. NESTERM turns e
 
 Choose a compact **40 × 25** display or a more detailed **64 × 30** display. Characters follow the shapes inside each cell, so sprites and scrolling backgrounds can move in smaller steps than a whole character.
 
+This repository and its releases contain the command-line application only.
+
 ## Install on macOS or Linux
 
 Paste this into your terminal:
@@ -58,7 +60,7 @@ The terminal display and cursor are restored when you exit. **The terminal versi
 
 For the best controls, use a terminal supporting the **Kitty keyboard protocol**, which reports key releases. NESTERM requests this mode automatically, allowing held keys and simultaneous buttons. Shift can also act as Select in this mode.
 
-Traditional terminals do not report key releases. NESTERM releases a key after 120 ms without a repeat, so holding directions or combining run and jump can be less reliable. If controls feel intermittent, use a compatible terminal or the browser version.
+Traditional terminals do not report key releases. NESTERM releases a key after 120 ms without a repeat, so holding directions or combining run and jump can be less reliable. If controls feel intermittent, use a terminal supporting the Kitty keyboard protocol.
 
 ## Pick a display size
 
@@ -93,12 +95,6 @@ To record a 30-second terminal session:
 nesterm "/path/to/game.nes" --size 64x30 --record session.cast --seconds 30
 ```
 
-## Try it in a browser
-
-Open **[NESTERM in your browser](https://fugudaro.com/nesterm/)** and choose a local ROM. The file stays in your browser; it is not uploaded.
-
-The browser version uses the same ASCII renderer and offers sound, touch controls and gamepad input. Keyboard controls are arrow keys, X, Z, Enter and Shift. Use the on-screen button to pause. Switch between 40 × 25 and 64 × 30 without restarting the game.
-
 ## Update, install elsewhere or uninstall
 
 Rerun the one-line installer to install the version it currently targets. Downloads are also on the [Releases page](https://github.com/kathoc/nesterm/releases).
@@ -115,37 +111,32 @@ The command will then be at `~/apps/nesterm/bin/nesterm`. To uninstall, remove t
 
 **Terminal is too small:** enlarge the window or use `--size 40x25`. NESTERM exits cleanly if you resize below the selected grid dimensions.
 
-**Held keys stop or run/jump combinations feel wrong:** use a terminal with the Kitty keyboard protocol, or the browser version. Traditional terminal input cannot accurately report key releases.
+**Held keys stop or run/jump combinations feel wrong:** use a terminal with the Kitty keyboard protocol. Traditional terminal input cannot accurately report key releases.
 
 **Node.js download failed:** check your connection or install Node.js 20+ yourself and rerun the installer. It does not replace a system-wide runtime.
 
 **A ROM does not load or behaves incorrectly:** compatibility depends on the emulation core. [Open an issue](https://github.com/kathoc/nesterm/issues) with your OS, terminal, Node.js version, command and ROM name/hash. Do not attach ROM files.
 
-Save-file persistence and terminal audio are not implemented. Browser sound can stutter under load. macOS and Linux are the installer targets; the Node.js CLI may also work on Windows, but this installer does not support it.
+Save-file persistence and terminal audio are not implemented. macOS and Linux are the installer targets; the Node.js CLI may also work on Windows, but this installer does not support it.
 
 ## Build from source
 
-For contributors, install Node.js 20+ and npm, then:
+For contributors, use Node.js 22+ and npm (the installed terminal app supports Node.js 20+), then:
 
 ```sh
 git clone https://github.com/kathoc/nesterm.git
 cd nesterm
 npm ci
+git config core.hooksPath .githooks
+npm run check:public
 npm test
 npm start -- "/path/to/game.nes" --size 64x30
 ```
 
 Tests include an original generated NES test program and do not need a commercial ROM. Enable the optional longer ROM test with `NESTERM_ROM="/path/to/game.nes" npm test`.
 
-To run the browser version locally:
-
-```sh
-npm run build
-npm run serve
-```
-
-Open the URL printed by the server. It stops after 20 minutes; use `npm run serve -- --minutes 60` to extend it. `dist/` is a static site and needs no server-side Node.js process when deployed.
+The publication guard checks tracked files against a CLI-only allowlist. Review and update that list when adding CLI files. Browser interfaces and browser-only tooling must never be added to this repository.
 
 ## Credits and license
 
-MIT licensed. NES emulation comes from [@nesjs/core](https://github.com/taiyuuki/nesjs); NESTERM supplies the ASCII renderer and terminal/browser frontends. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for dependency and glyph-mask notices.
+NESTERM's original code is MIT licensed. NES emulation comes from [@nesjs/core](https://github.com/taiyuuki/nesjs). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for dependency and glyph-mask notices.
