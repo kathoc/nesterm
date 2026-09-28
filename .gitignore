@@ -1,0 +1,20 @@
+node_modules/
+dist/
+artifacts/
+*.nes
+*.NES
+*.state.json
+# Machine-local work notes and publishing configuration stay on this machine.
+sources.md
+docs/spec.md
+docs/verification.md
+docs/recordings.md
+docs/reviews/
+scripts/deploy.mjs
+scripts/find-gameplay.mjs
+.env
+.env.*
+*.pem
+*.key
+*.tgz
+.DS_Store

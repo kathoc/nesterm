@@ -1,0 +1,25 @@
+{
+  "name": "nesterm",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Play NES games as ASCII art in your terminal: 40x25 or 64x30 characters",
+  "license": "MIT",
+  "author": "kathoc",
+  "repository": { "type": "git", "url": "https://github.com/kathoc/nesterm.git" },
+  "homepage": "https://github.com/kathoc/nesterm#readme",
+  "bugs": { "url": "https://github.com/kathoc/nesterm/issues" },
+  "keywords": ["nes", "emulator", "ascii", "terminal", "cli"],
+  "files": ["bin/", "src/", "README.md", "LICENSE", "LICENSES-glyphs.txt", "THIRD_PARTY_NOTICES.md"],
+  "bundleDependencies": ["@nesjs/core"],
+  "engines": { "node": ">=20" },
+  "bin": { "nesterm": "bin/nesterm.mjs" },
+  "scripts": {
+    "start": "node bin/nesterm.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "node --test",
+    "serve": "node scripts/serve.mjs",
+    "capture": "node scripts/capture.mjs"
+  },
+  "dependencies": { "@nesjs/core": "2.7.0" },
+  "devDependencies": { "@napi-rs/canvas": "0.1.80", "playwright": "1.55.1", "@xterm/headless": "5.5.0" }
+}
