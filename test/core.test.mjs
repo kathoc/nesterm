@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {AsciiRenderer} from '../src/renderer.mjs';
 import {ShapeMatcher} from '../src/shape.mjs';
+import {GLYPHS,GLYPHS_TALL} from '../src/glyphs.mjs';
 import {Emulator} from '../src/emulator.mjs';
 
 test('40x25 output uses only printable ASCII, including blank screen',()=>{
@@ -42,6 +43,50 @@ test('black overscan stays blank even when the dominant scene color is bright',(
   for(let y=210;y<240;y++) frame.fill(0,y*256,(y+1)*256);
   const out=r.render(frame,true);
   assert.equal(out.chars.slice(23*40),' '.repeat(80));
+});
+
+test('shape glyphs and colors do not depend on distant scene composition',()=>{
+  for (const [cols,rows] of [[40,25],[64,30]]) {
+    const renderer=new ShapeMatcher(cols,rows);
+    const outputs=[];
+    for (const background of [0x2070e0,0xe08020,0x2070e0,0xffffff,0]) {
+      const frame=new Uint32Array(61440).fill(background);
+      // A fixed patch surrounds complete cells, including fractional 40x25 boundaries.
+      for(let y=72;y<112;y++) for(let x=64;x<112;x++)
+        frame[y*256+x]=x%4<2?0x2070e0:0xe08020;
+      const out=renderer.render(frame,true);
+      const cell=Math.floor(88*rows/240)*cols+Math.floor(84*cols/256);
+      outputs.push([out.chars[cell],out.colors[cell]]);
+    }
+    for (const output of outputs) assert.deepEqual(output,outputs[0]);
+  }
+});
+
+test('shape colors follow a translated cell and real palette changes without temporal lag',()=>{
+  const renderer=new ShapeMatcher(64,30);
+  const first=new Uint32Array(61440),second=new Uint32Array(61440);
+  for(let y=80;y<88;y++) for(let x=80;x<84;x++) {
+    const p=x%4<2?0x2070e0:0xe08020;
+    first[y*256+x]=p;second[y*256+x+4]=p;
+  }
+  const a=renderer.render(first,true),b=renderer.render(second,true);
+  assert.equal(a.colors[660],b.colors[661]);
+  assert.equal(b.chars[660],' ','no trailing glyph in vacated cell');
+  const changed=second.map(p=>p?0x20e020:0);
+  const next=renderer.render(changed,true);
+  const fresh=new ShapeMatcher(64,30).render(changed,true);
+  assert.equal(next.colors[661],fresh.colors[661]);
+  assert.notEqual(next.colors[661],b.colors[661]);
+});
+
+test('flat fields use sparse ink rather than dense full-screen glyphs',()=>{
+  for(const [cols,rows,glyphs] of [[40,25,GLYPHS],[64,30,GLYPHS_TALL]]) {
+    const ink=new Map(glyphs.map(([char,mask])=>[char,mask.reduce((a,b)=>a+b,0)/(255*mask.length)]));
+    for(const color of [0xffffff,0xffb070,0x806030]) {
+      const out=new ShapeMatcher(cols,rows).render(new Uint32Array(61440).fill(color),true);
+      for(const char of new Set(out.chars)) assert.ok(ink.get(char)<.25,`flat field chose dense ${char}`);
+    }
+  }
 });
 
 test('64x30 grid represents an 8x8 NES tile with two ASCII cells',()=>{

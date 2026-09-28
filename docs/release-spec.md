@@ -68,3 +68,61 @@ The requested repository, English user guide and one-line installer are complete
 - Package inspection retained only CLI files, licenses and the bundled NES dependency; the release script validated its allowlist.
 - Local ignored controller tests still pass (13/13), and the upstream controller hash/provenance check still passes. Browser files were untracked, not deleted. No deployment or reference-repository write occurred.
 - No rendering or interaction behavior was changed, so no new UI screenshots were required for this separation.
+
+## Shape-mode color stability (2026-09-28)
+
+Reproduction: keep a two-color 4x8 cell unchanged while changing the distant
+background from one of those colors to the other. The old whole-frame modal
+background changes the cell from `q / #2081e2` to `L / #e27120`. Scrolling can
+cross this histogram boundary, recoloring otherwise unchanged scenery.
+
+Requirements: printable ASCII and existing grid sizes; no dependence on distant
+pixels; stable foreground hues; sub-cell movement; black overscan remains blank;
+no temporal framebuffer blending; shared renderer only, no browser publication.
+
+Options, in priority order (effect / cost):
+
+1. Fixed per-pixel brightness for shape and color weights: removes global dependency / low; adopt.
+2. Preserve existing glyph fitting and small tie preference: preserves motion detail / low; adopt.
+3. Regression tests for remote changes, translated cells, black borders and immediate color changes: verifies cause / low; adopt.
+4. Deterministic real-ROM before/after recordings: checks visual tradeoffs / moderate; adopt.
+5. Stabilize the modal background with a threshold: only delays the discontinuity / low; reject.
+6. Lock the first background color: depends on boot/title screen / low; reject.
+7. Blend foreground colors over time: produces lag/ghosts / low; reject.
+8. Infer a local background per cell: introduces new winner-switch boundaries / moderate; reject.
+9. Extract the PPU background palette: couples generic rendering to core state and cannot represent all backgrounds / high; defer.
+10. Match full RGB glyph reconstruction: potentially better color fidelity / high; defer.
+
+Use fixed RMS perceptual brightness sqrt(0.2126*r*r + 0.7152*g*g +
+0.0722*b*b)/255 for shape samples and foreground weighting. Preserve near-black
+suppression, coverage-driven intensity and hue-preserving scalar brightness
+boost. Remove background-derived fallback colors. An initial absolute-brightness
+prototype filled the sky with dense glyphs in the recorded gameplay. Refine only
+the shape signal to `1.5 * abs(sample - cellMean) + 0.1 * sample`; foreground
+color continues to use the unmodified fixed brightness weights. This local
+contrast has no winning background color and therefore no histogram boundary.
+Allow space to win the least-squares fit, require a minimum ink amplitude of
+0.65 and avoid amplifying low-contrast fields. Flat fields become sparse or
+blank while local edges remain visible. Keep all prototype recordings for review.
+
+Acceptance: unchanged cells retain exact glyph/color under remote scene changes;
+translated cell colors match; abrupt real source changes take effect immediately;
+existing CLI tests pass; before/after recordings and screenshots are saved locally.
+
+Verification:
+
+- Regression reproduced before the fix and passes after it for both 40x25 and 64x30.
+- Full CLI suite: 34 passed, one optional commercial-ROM test skipped; separate actual SMB3 execution covers 1,900 frames using the same deterministic inputs before/after.
+- Across 1,700,373 comparisons of cells whose source pixels were unchanged, old foreground colors changed 7,589 times; new foreground colors changed zero times. Details: local `artifacts/color-stability.json` and its bounded measurement script.
+- Before, initial prototype and final gameplay recordings: local `artifacts/20-color-before/`, `artifacts/21-color-after/`, `artifacts/22-color-stable/`. Each contains a 31.67-second MP4 and screenshots; these are actual emulated frames rendered through the shared ASCII renderer, not desktop recordings.
+- Inspected the actual level screenshot at frame 1500; final flat sky uses sparse punctuation rather than dense `@`/`h` fields. A separate ink-coverage regression checks flat fields at both grid sizes.
+- Local static build and CLI-only publication guard passed. No Git push or Sakura deployment was performed for this change.
+
+## Authorized publication follow-up
+
+The owner subsequently requested commit, deployment and push. Commit only the
+shared CLI renderer fix, its regression tests and this specification. Build and
+deploy the separate ignored browser application (language selection and viewport
+layout included) to the existing Sakura nesterm directory. Re-run CLI tests,
+the public-source guard and deployment safety checks, then verify hosted browser
+behavior and the GitHub CI. Never add browser files to the Git index.
